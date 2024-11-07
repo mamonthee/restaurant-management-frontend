@@ -1,0 +1,20 @@
+
+#btnAdd, #btnUpdate{
+    margin-right: 25px;
+    line-height: 30px;
+    width: 120px;
+    width: auto; 
+    background: #007bff !important; 
+    color: #fff !important;
+   }
+#btnClose{
+    width: auto; 
+    background: #db1f1f;
+    width: 120px;
+}
+.btn-groups{
+    display: flex !important; 
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+}
