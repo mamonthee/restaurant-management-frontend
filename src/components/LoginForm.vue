@@ -66,8 +66,6 @@ export default {
   methods: {
     async handleSubmit() {
       try {
-        console.log("Handling form submission");
-
         const response = await apiClient.post('/users/login', {
           email: this.username,
           password: this.password,
@@ -76,8 +74,6 @@ export default {
 
         // Handle successful login
         this.message = response.data.message || 'Login successful'; // Ensure message is set
-        console.log("Message name:", response.data.name);
-        console.log("userId",response.data.user_id);
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userId',response.data.user_id);
         localStorage.setItem('userRole',response.data.user_role);
@@ -92,7 +88,6 @@ export default {
         };
         eventBus.emit('userLoggedIn', userData);
         console.log("Login successful, status:", response.status);
-        // eventBus.setUser(userData); // Emit user data
         
           // Redirect to the Dashboard page
           if (response.data.user_role == "WAITER"){
@@ -106,9 +101,7 @@ export default {
         if (error.response) {
           // Handle error response from server
           this.message = error.response.data.message || 'Login failed. Please try again.';
-          console.log(error.response.data.message,"######");
         } else {
-          console.log(error.response);
           this.message = 'An unexpected error occurred. Please try again.';
         }
         window.alert(this.message);

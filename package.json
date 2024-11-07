@@ -12,6 +12,8 @@
     "bootstrap": "^5.3.3",
     "core-js": "^3.8.3",
     "jquery": "^3.7.1",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.4",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
     "vue3-eventbus": "^2.0.0"

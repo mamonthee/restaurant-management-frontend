@@ -204,52 +204,43 @@ export default {
     }
   },
   mounted(){
-    // if (this.$route.path !== '/'){
-    //   console.log("MOUNT*******",this.$route.path);
     eventBus.on('userLoggedIn', (data) => {
-         this.user = data;
-        //  console.log(this.user)
-        //  console.log(this.user.userName);
-         this.userName = this.user.userName;
-         this.userRole = this.user.userRole;
-         this.userId = this.user.userId;
-           this.fetchUsers();
-           WebSocketService.connect();
+      this.user = data;
+      this.userName = this.user.userName;
+      this.userRole = this.user.userRole;
+      this.userId = this.user.userId;
+      this.fetchUsers();
+      WebSocketService.connect();
 
-          WebSocketService.on('newOrder', (order) => {
-            console.log("Webservice");
-            // console.log("order",order)
-            this.orderId=order; // Store the full order details
-            if (this.users.user_role === 'KITCHEN'){
-              this.handleNewOrder(this.orderId);
-              eventBus.emit('refreshOrders'); 
-            }
-            
-          });
-      });
+      // WebSocketService.on('newOrder', (order) => {
+      //   console.log("Webservice on EventBus");
+      //   // console.log("order",order)
+      //   this.orderId=order; // Store the full order details
+      //   if (this.users.user_role === 'KITCHEN'){
+      //     this.handleNewOrder(this.orderId);
+      //     eventBus.emit('refreshOrders'); 
+      //   }        
+      // });
+    });
 
-      this.token = localStorage.getItem('token');
-      this.userId = localStorage.getItem('userId');
-      this.userRole = localStorage.getItem('userRole');
-      this.userName = localStorage.getItem('userName');
-      console.log("mounted",this.userName);
+    this.token = localStorage.getItem('token');
+    this.userId = localStorage.getItem('userId');
+    this.userRole = localStorage.getItem('userRole');
+    this.userName = localStorage.getItem('userName');
     
-      this.allowSoundOnInteraction();
-      this.profileModal = new Modal(document.getElementById('profileModal'));
-      this.showNotificationModal = new Modal(document.getElementById('showNotificationModal'));
-    // }
+    
+    this.allowSoundOnInteraction();
+    this.profileModal = new Modal(document.getElementById('profileModal'));
+    this.showNotificationModal = new Modal(document.getElementById('showNotificationModal'));
   },
   methods: {
     toggleSidebar() {
       this.isActive = !this.isActive;
     },
     viewProfile(){
-      console.log("view");
       this.profileModal.show();
     },
     logout(){
-      console.log("logout");
-      
       this.isLoggedIn = false;
       localStorage.removeItem("token");
       localStorage.removeItem('userId');
@@ -296,9 +287,9 @@ export default {
       // Update local storage with the modified notifications array
       localStorage.setItem('notifications', JSON.stringify(this.notifications));
     
-    // Update the notification count
-    this.notificationCount = this.notifications.length;
-    localStorage.setItem('notificationCount', this.notificationCount);
+      // Update the notification count
+      this.notificationCount = this.notifications.length;
+      localStorage.setItem('notificationCount', this.notificationCount);
       // Navigate to the viewOrder page with the orderId
       this.$router.push('/kitchen');
 
@@ -310,9 +301,9 @@ export default {
        // Update local storage with the modified prepare notifications array
       localStorage.setItem('prepareNotis', JSON.stringify(this.prepareNotis));
     
-    // Update the notification count
-    this.prepareNotiCount = this.prepareNotis.length;
-    localStorage.setItem('prepareNotiCount', this.prepareNotiCount);
+      // Update the notification count
+      this.prepareNotiCount = this.prepareNotis.length;
+      localStorage.setItem('prepareNotiCount', this.prepareNotiCount);
       // Navigate to the viewOrder page with the orderId
       this.$router.push({path: '/viewOrder',query:{orderId}});
 

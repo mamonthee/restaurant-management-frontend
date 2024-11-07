@@ -143,15 +143,15 @@
       <div class="date-filters mb-4 row d-flex ">
         <div class="col-lg-3">
           <label for="startDate" class="mr-2">Start Date:</label>
-          <input type="date" v-model="startDate" @change="fetchInvoices" class="form-control d-inline-block" />
+          <input type="date" v-model="startDate" class="form-control d-inline-block" />
         </div>
         <div class="col-lg-3">
           <label for="endDate" class="mr-2">End Date:</label>
-          <input type="date" v-model="endDate" @change="fetchInvoices" class="form-control d-inline-block" />
+          <input type="date" v-model="endDate" class="form-control d-inline-block" />
         </div>
         <div class="col-lg-4 d-flex justify-content-around mt-3">
           <button @click="fetchInvoices" class="btn btn-primary ml-2 mr-5" style="width: 100px;line-height: 30px;">Filter</button>
-          <button @click="exportToCSV" class="btn btn-danger ml-2">Export to PDF</button>
+          <button @click="exportToPDF" class="btn btn-danger ml-2">Export to PDF</button>
           <button @click="exportToCSV" class="btn btn-success ml-2">Export to CSV</button>
         </div>
        
@@ -179,6 +179,12 @@
             <td>{{ invoice.payment_status }}</td>
           </tr>
         </tbody>
+        <tfoot>
+        <tr>
+          <td colspan="3" class="text-right font-weight-bold">Total Amount:</td>
+          <td colspan="3" class="font-weight-bold">${{ finalTotalAmount.toFixed(2) }}</td>
+        </tr>
+      </tfoot>
       </table>
       
       <div v-if="invoices.length === 0" class="alert alert-warning text-center">
@@ -189,6 +195,8 @@
   
   <script>
   import apiClient from '@/services/axios';
+  import jsPDF from 'jspdf';
+  import 'jspdf-autotable';
   export default {
     name: 'ReportPage',
     data() {
@@ -202,6 +210,14 @@
     mounted() {
       this.token = localStorage.getItem('token');
     },
+    computed: {
+      finalTotalAmount() {
+      return this.invoices.reduce((total, invoice) => total + invoice.total_amount, 0);
+      },
+      // totalQuantity() {
+        // return this.invoices.reduce((total, order) => total + invoice.totalQuantity, 0);
+      // }
+    },
     methods: {
       async fetchInvoices() {
         try {
@@ -211,7 +227,7 @@
             },
           });
           if (response.status === 200) {
-            this.invoices = response.data;
+            this.invoices = Array.isArray(response.data) ? response.data : [];
           } else {
             console.error('Failed to fetch invoices:', response.status);
             window.alert(`Failed to fetch invoices: ${response.status}`);
@@ -225,8 +241,63 @@
         return new Date(dateString).toLocaleDateString(undefined, options);
       },
       exportToCSV() {
-        // CSV export logic goes here
-      }
+    const csvContent = [
+      ['Invoice Number', 'Date', 'Table Number', 'Total Amount', 'Payment Method', 'Paid Status'],
+      ...this.invoices.map((invoice) => [
+        invoice.invoice_number,
+        this.formatDate(invoice.created_at),
+        invoice.table_number,
+        `$${invoice.total_amount.toFixed(2)}`,
+        invoice.payment_method,
+        invoice.payment_status,
+      ]),
+      // Add footer row with total amount
+      ['', '', 'Total Amount:', `$${this.finalTotalAmount.toFixed(2)}`, '', '']
+    ];
+
+    const csvString = csvContent.map(row => row.join(",")).join("\n");
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "invoice_report.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  },
+  exportToPDF() {
+    const doc = new jsPDF();
+    doc.text("Invoice Report", 14, 10);
+
+    doc.autoTable({
+      head: [['Invoice Number', 'Date', 'Table Number', 'Total Amount', 'Payment Method', 'Paid Status']],
+      body: this.invoices.map((invoice) => [
+        invoice.invoice_number,
+        this.formatDate(invoice.created_at),
+        invoice.table_number,
+        `$${invoice.total_amount.toFixed(2)}`,
+        invoice.payment_method,
+        invoice.payment_status,
+      ]),
+      startY: 20,
+      theme: 'striped'
+    });
+
+    // Add footer row with total amount
+    doc.autoTable({
+      body: [['', '', 'Total Amount:', `$${this.finalTotalAmount.toFixed(2)}`, '', '']],
+      startY: doc.autoTable.previous.finalY + 10,
+      theme: 'plain',
+      styles: {
+      halign: 'left', // Align the total text to the left side of the table
+    },
+    columnStyles: {
+      0: { halign: 'left' } // Align only in the first column
+    }
+    });
+
+    doc.save("invoice_report.pdf");
+  }
     }
   }
   </script>
